@@ -1,7 +1,7 @@
 <script lang="ts">
 </script>
 <template>
-    <h1>Default Layout</h1>
+    <h4>Welcome to Foodieland</h4>
 
    </template>
             

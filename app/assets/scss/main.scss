@@ -1,0 +1,11 @@
+body {
+    font-family: $font-body; // Police par défaut pour tout le texte
+    line-height: 1.6; // Améliore la lisibilité
+    margin: 0;
+    padding: 0;
+}
+
+// 2. Applique la police spécifique pour les titres et le Header
+h1, h2, h3, h4, h5, h6, .main-header {
+    font-family: $font-header; // Montserrat pour les titres
+}

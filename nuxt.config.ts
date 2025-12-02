@@ -8,9 +8,18 @@ export default defineNuxtConfig({
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: '@use "~/assets/scss/variables" as *; @use "~/assets/scss/mixins" as *;',
+          // Ligne corrigée ci-dessous
+          additionalData: '@use "~/assets/scss/_variables.scss" as *; @use "~/assets/scss/_mixins.scss" as *;',
         },
       },
     },
   },
+  app: {
+    head: {
+      link: [
+        // Lien vers le CDN Font Awesome
+        { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css' }
+      ]
+    }
+  }
 })

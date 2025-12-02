@@ -1,7 +1,7 @@
 <script lang="ts">
 </script>
 <template>
-    <h4>Welcome to Foodieland</h4>
+    <h1>Welcome to Foodieland</h1>
 
    </template>
             

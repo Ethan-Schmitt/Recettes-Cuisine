@@ -2,5 +2,15 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxt/eslint', '@nuxt/image', '@nuxt/test-utils']
+  modules: ['@nuxt/eslint', '@nuxt/image', '@nuxt/test-utils'],
+  css: ['~/assets/scss/main.scss'],
+  vite: {
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: '@use "~/assets/scss/variables" as *; @use "~/assets/scss/mixins" as *;',
+        },
+      },
+    },
+  },
 })

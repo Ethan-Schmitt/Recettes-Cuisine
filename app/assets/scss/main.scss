@@ -1,19 +1,18 @@
 body {
-    font-family: $font-body; // Police par défaut pour tout le texte
-    line-height: 1.6; // Améliore la lisibilité
+    font-family: $font-body; 
+    line-height: 1.6; 
     margin: 0;
     padding: 0;
     
 }
 
-// 2. Applique la police spécifique pour les titres et le Header
+
 h1, h2, h3, h4, h5, h6, .main-header {
-    font-family: $font-header; // Montserrat pour les titres
+    font-family: $font-header; 
 }
 
 h1 {
-    // Le h1 aura toujours une taille comprise entre 2.5rem et 4rem. 
-    // Il sera à 5vw (5% de la largeur de la vue) sur les écrans intermédiaires.
+   
     font-size: clamp(1.5rem, 5vw, 2rem); 
 }
 

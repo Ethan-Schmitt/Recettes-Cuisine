@@ -8,7 +8,7 @@ export default defineNuxtConfig({
     css: {
       preprocessorOptions: {
         scss: {
-          // Ligne corrigée ci-dessous
+         
           additionalData: '@use "~/assets/scss/_variables.scss" as *; @use "~/assets/scss/_mixins.scss" as *;',
         },
       },
@@ -28,6 +28,12 @@ export default defineNuxtConfig({
           href: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;700&display=swap' 
         },
       ]
+    }
+  },
+ 
+  runtimeConfig: {
+    public: {
+      apiUrl: 'http://localhost:2000' 
     }
   }
 })

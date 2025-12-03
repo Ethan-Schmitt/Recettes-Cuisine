@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// Définis les liens que tu veux répéter dans le Footer
 const footerLinks = [
   { name: 'Recipes', to: '/recettes' },
   { name: 'Blog', to: '/blog' },
@@ -7,7 +6,6 @@ const footerLinks = [
   { name: 'About us', to: '/a-propos'}
 ];
 
-// Définis les liens vers les réseaux sociaux
 const socialLinks = [
   { iconClass: 'fab fa-facebook-f', to: '#' },
   { iconClass: 'fab fa-twitter', to: '#' },
@@ -25,7 +23,6 @@ const socialLinks = [
         </NuxtLink>
         <p class="tagline">Trouvez l'inspiration, créez la magie.</p>
         <p class="copyright">© {{ new Date().getFullYear() }} Foodieland. All rights reserved.</p>
-      
       </div>
 
       <nav class="footer-nav">
@@ -47,30 +44,30 @@ const socialLinks = [
     </div>
   </footer>
 </template>
+
 <style lang="scss">
 .main-footer {
     border-top: 1px solid $light-border-color;
     padding: 2rem 0;
     color: $text-color;
-    text-align: center; /* Centrage par défaut pour le mobile */
+    text-align: center;
 }
 
 .container {
     display: flex;
-    flex-direction: column; /* 🛑 Mobile-First: Empile les blocs verticalement */
+    flex-direction: column;
     align-items: center;
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
-    gap: 2rem; /* Espacement entre les blocs sur mobile */
+    gap: 2rem;
 }
 
-/* --- Bloc d'Information (Logo/Tagline) --- */
 .info-block {
     display: flex;
     flex-direction: column;
     align-items: center;
-    order: 1; /* Reste en haut */
+    order: 1;
 }
 
 .logo {
@@ -96,22 +93,19 @@ const socialLinks = [
 .copyright {
     font-size: 0.8rem;
     color: lighten($text-color, 40%);
-    order: 3; /* Le copyright se retrouve en bas de tout sur mobile */
+    order: 3;
     margin-top: 1rem;
 }
 
-/* --- Navigation du Footer --- */
 .footer-nav {
     order: 2;
-    // On cache la navigation pour le mobile, car elle est souvent répétitive
     display: none; 
 }
 
-/* --- Liens Sociaux --- */
 .social-links {
     display: flex;
     gap: 1.5rem; 
-    order: 4; /* Vient après l'info sur mobile */
+    order: 4;
     margin-top: 1.5rem;
 }
 
@@ -125,29 +119,23 @@ const socialLinks = [
     }
 }
 
-// ===============================================
-// MEDIA QUERY : Version Desktop (à partir de 768px)
-// ===============================================
 @media (min-width: 768px) {
     .main-footer {
-        text-align: left; /* Réaligner à gauche sur desktop */
+        text-align: left;
     }
 
     .container {
-        flex-direction: row; /* 🛑 Desktop: Affiche les blocs horizontalement */
+        flex-direction: row;
         justify-content: space-between;
         align-items: flex-start;
         gap: 3rem; 
     }
     
-    /* Bloc Info/Copyright */
     .info-block {
         order: 1; 
         align-items: flex-start;
-        // On pourrait réduire la largeur ici si on veut
     }
     
-    /* Navigation (réactiver l'affichage) */
     .footer-nav {
         display: block; 
         order: 2; 
@@ -161,32 +149,23 @@ const socialLinks = [
         margin: 0;
     }
     
-    /* Liens Sociaux */
     .social-links {
         order: 3; 
         margin-top: 0;
     }
 
-    /* Le copyright doit être dans l'info-block, et la navigation et les liens sociaux 
-       doivent être alignés sur le côté droit pour ressembler au design */
-    
-    /* Pour un layout plus proche du design, on peut forcer l'alignement à la fin 
-       et s'assurer que l'info-block prend l'espace nécessaire. */
-
     .container {
-        // Optionnel : s'assurer que l'info est à gauche et le reste à droite
-        // Si tu veux que la navigation et les sociaux soient groupés à droite:
         justify-content: space-between;
         align-items: center; 
     }
     
     .footer-nav {
-        margin-left: auto; /* Pousse la navigation vers la droite */
+        margin-left: auto;
         margin-right: 2rem; 
     }
     
     .copyright {
-        order: initial; /* Retourne à l'ordre normal */
+        order: initial;
         margin-top: 2rem;
     }
 }

@@ -20,7 +20,7 @@ const navLinks = computed(() => {
   ];
 
   if (isLoggedIn.value) {
-    baseLinks.push({ name: 'Connecté', to: '#logout', isLogout: true });
+    baseLinks.push({ name: 'Déconnexion', to: '#logout', isLogout: true });
   } else {
     baseLinks.push({ name: 'Connexion', to: '/login', isLogout: false });
   }
@@ -130,6 +130,7 @@ $primary-color: #ff6600;
 $text-color: #333;
 $light-border-color: #eee;
 $success-color: #4caf50;
+$deconnect-color: #d9534f;
 
 .main-header {
   border-bottom: 1px solid $light-border-color;
@@ -184,15 +185,15 @@ $success-color: #4caf50;
   }
 
   &.is-connected {
-    color: $success-color !important;
+    color: $deconnect-color !important;
     font-weight: bold;
-    border: 1px solid $success-color;
+    border: 1px solid $deconnect-color;
     padding: 5px 10px;
     border-radius: 5px;
 
     &:hover {
-      background-color: lighten($success-color, 40%);
-      color: $success-color !important;
+      background-color: lighten($deconnect-color, 40%);
+      color: $deconnect-color !important;
     }
   }
 }
@@ -305,7 +306,7 @@ $success-color: #4caf50;
 
     .nav-link.is-connected {
       padding: 5px 10px;
-      border: 1px solid $success-color;
+      border: 1px solid $deconnect-color;
     }
   }
 

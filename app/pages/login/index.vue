@@ -3,16 +3,14 @@ import { ref, watch } from 'vue'
 
 const email = ref('')
 const password = ref('')
-const loginError = ref<string | null>(null) // Pour gérer les messages d'erreur de connexion
+const loginError = ref<string | null>(null)
 const config = useRuntimeConfig()
 
-// 1. GESTION DE L'ÉTAT DE CONNEXION
-// On récupère le cookie 'recipe_token'
 const tokenCookie = useCookie('recipe_token')
-const isLoggedIn = computed(() => !!tokenCookie.value) // Vrai si le token existe
+const isLoggedIn = computed(() => !!tokenCookie.value)
 
 async function onSubmit () {
-  loginError.value = null // Réinitialiser l'erreur
+  loginError.value = null
 
   if (!email.value || !password.value) {
     loginError.value = "Veuillez remplir tous les champs."
@@ -37,13 +35,10 @@ async function onSubmit () {
     const json = await response.json()
 
     if (response.ok && json.data?.token) {
-      // Succès : stocker le token dans le cookie
       const token = json.data.token
       tokenCookie.value = token
-      // La redirection sera gérée par le watcher
       
     } else {
-      // Échec de connexion (mauvais identifiants)
       loginError.value = json.message || "Email ou mot de passe incorrect."
     }
 
@@ -54,9 +49,9 @@ async function onSubmit () {
 }
 
 function onLogout () {
-  tokenCookie.value = null // Supprime le cookie
+  tokenCookie.value = null 
   loginError.value = null
-  navigateTo('/login') // Reste sur la page de connexion
+  navigateTo('/login') 
 }
 </script>
 
@@ -65,7 +60,7 @@ function onLogout () {
     <div class="login-card">
       
       <div v-if="isLoggedIn" class="logged-in-message">
-        <h2>🎉 Tu es déjà connecté !</h2>
+        <h2>🎉 Tu es connecté !</h2>
         <p>Tu peux te rendre sur l'espace recettes ou te déconnecter.</p>
         <button @click="onLogout" class="logout-button">Se déconnecter</button>
       </div>
@@ -111,12 +106,12 @@ $error-color: #d9534f;
 $success-color: #5cb85c;
 
 .login-page-container {
-  min-height: calc(100vh - 120px); /* Assure la hauteur totale moins la taille du Header/Footer */
+  min-height: calc(100vh - 120px);
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 40px 20px;
-  background-color: $color-secondary; /* Un fond léger */
+  background-color: $color-secondary;
 }
 
 .login-card {
@@ -140,7 +135,6 @@ $success-color: #5cb85c;
   } 
 }
 
-/* --- Formulaire --- */
 .login-form {
   display: flex;
   flex-direction: column;
@@ -202,7 +196,6 @@ $success-color: #5cb85c;
   font-size: 0.9rem;
 }
 
-/* --- Liens --- */
 .signup-link {
   margin-top: 20px;
   font-size: 0.95rem;
@@ -218,7 +211,6 @@ $success-color: #5cb85c;
   }
 }
 
-/* --- État Connecté --- */
 .logged-in-message {
   h2 {
     color: $success-color;
@@ -232,7 +224,7 @@ $success-color: #5cb85c;
 }
 
 .logout-button {
-  @extend .submit-button; /* Hérite du style du bouton submit */
+  @extend .submit-button;
   background-color: #ccc;
   color: $text-color;
   

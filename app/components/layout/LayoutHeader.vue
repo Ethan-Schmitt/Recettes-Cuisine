@@ -2,11 +2,10 @@
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
 
 const navLinks = [
-  { name: 'Home', to: '/' },
-  { name: 'Recipes', to: '/recettes' },
-  { name: 'blog', to: '/blog' },
+  { name: 'Recettes', to: '/recettes' },
+  { name: 'Blog', to: '/blog' },
   { name: 'Contact', to: '/contact' },
-  { name: 'About us', to: '/a-propos' }
+  { name: 'Connexion', to: '/login' }
 ];
 
 const socialLinks = [

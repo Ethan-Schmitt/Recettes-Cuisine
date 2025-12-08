@@ -1,23 +1,19 @@
 <script lang="ts" setup>
-// 🛑 Importer les types nécessaires
+
 import { useRoute, useRuntimeConfig, useAsyncData, createError, useHead } from '#imports'
 
 const route = useRoute()
 const config = useRuntimeConfig()
 
-// Appel API pour récupérer une seule recette par ID
 const { data: recipe, error } = await useAsyncData(`recipe-${route.params.id}`, async () => {
-  // Supposons que l'API retourne l'objet { data: FullRecipe }
   const { data } = await $fetch<ApiResponse<FullRecipe>>(`${config.public.apiUrl}/api/recipes/${route.params.id}`)
   return data
 })
 
-// Gestion des erreurs
 if (!recipe.value || error.value) {
   throw createError({ statusCode: 404, statusMessage: 'Recette non trouvée.', fatal: true })
 }
 
-// Mise à jour des métadonnées (SEO)
 useHead({
   title: recipe.value.title + ' - Foodieland',
   meta: [
@@ -28,8 +24,6 @@ useHead({
   ]
 })
 
-// Variables CSS pour le Hero (Note : Ces variables doivent être définies 
-// soit globalement, soit importées si non globales. Ici, on les passe au template via style.)
 const heroStyle = computed(() => ({
   backgroundImage: `url('/recipes/${recipe.value?.image_url}')`
 }))
@@ -37,7 +31,6 @@ const heroStyle = computed(() => ({
 
 <template>
   <div v-if="recipe" class="recipe-detail-page">
-    
     <header class="recipe-hero" :style="heroStyle">
       <div class="hero-overlay">
         <div class="container">
@@ -48,11 +41,9 @@ const heroStyle = computed(() => ({
         </div>
       </div>
     </header>
-    
     <main class="recipe-content-main">
       <div class="container">
         <div class="content-grid">
-          
           <section class="ingredients-card">
             <h2 class="section-title">🔪 Ingrédients</h2>
             <ul class="ingredient-list">
@@ -66,7 +57,6 @@ const heroStyle = computed(() => ({
               </li>
             </ul>
           </section>
-
           <section class="instructions-section">
             <h2 class="section-title">🧑‍🍳 Préparation</h2>
             <div class="instructions">
@@ -75,11 +65,9 @@ const heroStyle = computed(() => ({
               </p>
             </div>
           </section>
-
         </div>
       </div>
     </main>
-
   </div>
 </template>
 
@@ -91,11 +79,7 @@ const heroStyle = computed(() => ({
     padding: 0 20px;
 }
 
-/* -------------------------------------------
-   1. HERO SECTION (Image de fond)
-   ------------------------------------------- */
 .recipe-hero {
-    // Hauteur et propriétés de l'image de fond
     height: 60vh;
     min-height: 400px;
     background-size: cover;
@@ -104,7 +88,6 @@ const heroStyle = computed(() => ({
     display: flex;
     align-items: flex-end;
     
-    // Gradient pour obscurcir l'image et rendre le texte lisible
     .hero-overlay {
         position: absolute;
         inset: 0;
@@ -115,7 +98,6 @@ const heroStyle = computed(() => ({
     }
     
     .container {
-        // Garantit que le contenu est bien au-dessus de l'overlay
         position: relative; 
         z-index: 10;
         width: 100%;
@@ -145,22 +127,19 @@ const heroStyle = computed(() => ({
     }
 }
 
-/* -------------------------------------------
-   2. CONTENU PRINCIPAL
-   ------------------------------------------- */
 .recipe-content-main {
     padding: 50px 0;
     
     .content-grid {
         display: grid;
-        grid-template-columns: 1fr 2fr; // Ingrédients plus petits, instructions plus grandes
+        grid-template-columns: 1fr 2fr;
         gap: 40px;
-        margin-top: -80px; // Pour remonter visuellement la carte des ingrédients
+        margin-top: -80px;
         position: relative;
         z-index: 5;
         
         @media (max-width: 1024px) {
-             grid-template-columns: 1fr; // Empilement sur tablette et mobile
+             grid-template-columns: 1fr;
              margin-top: 0;
         }
     }
@@ -176,13 +155,12 @@ const heroStyle = computed(() => ({
     font-weight: 700;
 }
 
-/* --- Ingrédients (Carte Latérale) --- */
 .ingredients-card {
     background-color: white;
     padding: 30px;
     border-radius: $radius;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    height: fit-content; // Important pour éviter qu'elle ne prenne toute la hauteur en desktop
+    height: fit-content;
     border-top: 5px solid $primary-color;
 
     .ingredient-list {
@@ -207,7 +185,7 @@ const heroStyle = computed(() => ({
             color: $primary-color;
             font-weight: 600;
             margin-right: 15px;
-            white-space: nowrap; // Empêche la quantité de couper
+            white-space: nowrap;
         }
         
         .name {
@@ -217,7 +195,6 @@ const heroStyle = computed(() => ({
     }
 }
 
-/* --- Instructions --- */
 .instructions-section {
     padding: 20px 0;
     font-family: $font-body;
@@ -227,19 +204,11 @@ const heroStyle = computed(() => ({
         line-height: 1.8;
         font-size: 1.1rem;
         
-        // Style pour les étapes (si l'API utilise des <br> pour les séparer)
         & > br {
             content: "";
             display: block;
             margin-top: 15px;
         }
-        
-        // Si tu utilises des numéros dans tes instructions, tu peux les styliser
-        /*
-        & > p {
-            margin-bottom: 15px;
-        }
-        */
     }
 }
 </style>

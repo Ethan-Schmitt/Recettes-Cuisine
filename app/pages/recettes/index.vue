@@ -136,9 +136,9 @@ if (error && error.value) throw new Error('Page not Found')
           <NuxtImg :src="`/recipes/` + recipe.image_url" :alt="recipe.title" class="recipe-image" loading="lazy" />
           <div class="recipe-content">
             <span class="recipe-cuisine">{{ recipe.cuisine_name }}</span>
-            <NuxtLink :to="`/recipe/${recipe.recipe_id}`" class="recipe-title-link">
-              <h2 class="recipe-title">{{ recipe.title }}</h2>
-            </NuxtLink>
+           <NuxtLink :to="`/recettes/${recipe.recipe_id}`" class="recipe-title-link">
+    <h2 class="recipe-title">{{ recipe.title }}</h2>
+</NuxtLink>
           </div>
         </article>
         

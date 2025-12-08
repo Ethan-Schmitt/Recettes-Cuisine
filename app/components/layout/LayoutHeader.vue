@@ -1,12 +1,31 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue';
 
-const navLinks = [
-  { name: 'Recettes', to: '/recettes' },
-  { name: 'Blog', to: '/blog' },
-  { name: 'Contact', to: '/contact' },
-  { name: 'Connexion', to: '/login' }
-];
+// 🛑 NOUVEAUTÉ : Logique de l'état de connexion et du cookie
+const tokenCookie = useCookie('recipe_token');
+const isLoggedIn = computed(() => !!tokenCookie.value);
+
+// 🛑 NOUVEAUTÉ : Fonction de déconnexion
+const onLogout = () => {
+  tokenCookie.value = null;
+  closeMenu();
+};
+
+// 🛑 MODIFICATION : Les liens sont calculés dynamiquement
+const navLinks = computed(() => {
+  const baseLinks = [
+    { name: 'Recettes', to: '/recettes' },
+    { name: 'Blog', to: '/blog' },
+    { name: 'Contact', to: '/contact' }
+  ];
+
+  if (isLoggedIn.value) {
+    baseLinks.push({ name: 'Connecté', to: '#logout', isLogout: true });
+  } else {
+    baseLinks.push({ name: 'Connexion', to: '/login', isLogout: false });
+  }
+  return baseLinks;
+});
 
 const socialLinks = [
   { iconClass: 'fab fa-facebook-f', to: '#' },
@@ -55,33 +74,50 @@ onBeforeUnmount(() => {
       </NuxtLink>
 
       <button class="burger-btn" :aria-expanded="isMenuOpen" aria-controls="main-menu" @click="toggleMenu">
-        <span class="icon-bar"/>
-        <span class="icon-bar"/>
-        <span class="icon-bar"/>
+        <span class="icon-bar" />
+        <span class="icon-bar" />
+        <span class="icon-bar" />
       </button>
 
-      <nav 
-        id="main-menu"
-        class="main-nav" 
-        :class="{ 'is-open': isMenuOpen }"
-      >
+      <nav id="main-menu" class="main-nav" :class="{ 'is-open': isMenuOpen }">
         <ul class="nav-list">
           <li v-for="link in navLinks" :key="link.name" class="nav-item">
-            <NuxtLink :to="link.to" class="nav-link" @click="closeMenu">
+            <a
+              v-if="link.isLogout"
+              href="#"
+              class="nav-link is-connected"
+              @click.prevent="onLogout"
+            >
+              {{ link.name }}
+            </a>
+            <NuxtLink v-else :to="link.to" class="nav-link" @click="closeMenu">
               {{ link.name }}
             </NuxtLink>
           </li>
         </ul>
 
         <div class="social-links mobile-only">
-          <a v-for="(social, index) in socialLinks" :key="index" :href="social.to" target="_blank" class="social-icon" @click="closeMenu">
-            <span :class="social.iconClass"/>
+          <a
+            v-for="(social, index) in socialLinks"
+            :key="index"
+            :href="social.to"
+            target="_blank"
+            class="social-icon"
+            @click="closeMenu"
+          >
+            <span :class="social.iconClass" />
           </a>
         </div>
       </nav>
 
       <div class="social-links desktop-only">
-        <a v-for="(social, index) in socialLinks" :key="index" :href="social.to" target="_blank" class="social-icon">
+        <a
+          v-for="(social, index) in socialLinks"
+          :key="index"
+          :href="social.to"
+          target="_blank"
+          class="social-icon"
+        >
           <span :class="social.iconClass" />
         </a>
       </div>
@@ -90,6 +126,11 @@ onBeforeUnmount(() => {
 </template>
 
 <style lang="scss" scoped>
+$primary-color: #ff6600;
+$text-color: #333;
+$light-border-color: #eee;
+$success-color: #4caf50;
+
 .main-header {
   border-bottom: 1px solid $light-border-color;
   padding: 1.5rem 0;
@@ -113,7 +154,7 @@ onBeforeUnmount(() => {
 
   &::first-letter {
     color: $primary-color;
-  } 
+  }
 }
 
 .main-nav {
@@ -136,9 +177,23 @@ onBeforeUnmount(() => {
   color: $text-color;
   font-size: 0.95rem;
   transition: color 0.2s;
+  cursor: pointer;
 
   &:hover {
     color: $primary-color;
+  }
+
+  &.is-connected {
+    color: $success-color !important;
+    font-weight: bold;
+    border: 1px solid $success-color;
+    padding: 5px 10px;
+    border-radius: 5px;
+
+    &:hover {
+      background-color: lighten($success-color, 40%);
+      color: $success-color !important;
+    }
   }
 }
 
@@ -204,7 +259,6 @@ onBeforeUnmount(() => {
   padding: 8rem 0 0 0 !important;
   background-color: white;
   z-index: 999;
-  padding-top: 8rem;
   justify-content: flex-start;
   align-items: center;
 
@@ -222,13 +276,13 @@ onBeforeUnmount(() => {
     font-size: 1.2rem;
     padding: 0.5rem 0;
     display: block;
-  }
-}
 
-.social-links.mobile-only {
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
+    &.is-connected {
+      border: none;
+      padding: 0.5rem 0;
+      font-size: 1.4rem;
+    }
+  }
 }
 
 @media (min-width: 768px) {
@@ -247,6 +301,11 @@ onBeforeUnmount(() => {
 
     .nav-list {
       flex-direction: row;
+    }
+
+    .nav-link.is-connected {
+      padding: 5px 10px;
+      border: 1px solid $success-color;
     }
   }
 

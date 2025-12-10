@@ -2,9 +2,28 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxt/eslint', '@nuxt/image', '@nuxt/test-utils'],
+  srcDir: 'app/',
+  modules: ['@nuxt/eslint', '@nuxt/image', '@nuxt/test-utils', '@nuxtjs/sanity'],
   css: ['~/assets/scss/main.scss'],
+    
+  image: {
+    dir: '../public'
+  },
+  
+  sanity: {
+    projectId: 'pv51b7bd',
+    dataset: 'production',
+    visualEditing:{
+      token: process.env.NUXT_SANITY_API_TOKEN,
+      studioUrl: process.env.NUXT_SANITY_STUDIO_URL,
+      stega: false 
+    }
+  },
+  
   vite: {
+     optimizeDeps: {
+      include: ['react-compiler-runtime', 'react', 'react-dom']
+    },
     css: {
       preprocessorOptions: {
         scss: {

@@ -133,7 +133,7 @@ if (error && error.value) throw new Error('Page not Found')
 
       <div class="recipes-grid">
         <article v-for="(recipe, index) in displayedRecipes" :key="index" class="recipe-card">
-          <NuxtImg :src="`/recipes/` + recipe.image_url" :alt="recipe.title" class="recipe-image" loading="lazy" />
+           <NuxtImg :src="`/recipes/${recipe.image_url}`" :alt="recipe.title" class="recipe-image" loading="lazy" />
           <div class="recipe-content">
             <span class="recipe-cuisine">{{ recipe.cuisine_name }}</span>
            <NuxtLink :to="`/recettes/${recipe.recipe_id}`" class="recipe-title-link">

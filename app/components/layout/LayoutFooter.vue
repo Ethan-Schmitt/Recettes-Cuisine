@@ -1,9 +1,8 @@
 <script setup lang="ts">
 const footerLinks = [
   { name: 'Recipes', to: '/recettes' },
-  { name: 'Blog', to: '/blog' },
+  { name: 'Dashboard', to: '/dashboard' },
   { name: 'Contact', to: '/contact' }, 
-  { name: 'About us', to: '/a-propos'}
 ];
 
 const socialLinks = [

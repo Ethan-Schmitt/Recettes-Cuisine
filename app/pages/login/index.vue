@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch} from 'vue'
+import { ref,computed} from 'vue'
 
 const email = ref('')
 const password = ref('')
@@ -38,6 +38,9 @@ async function onSubmit () {
       const token = json.data.token
       tokenCookie.value = token
       
+      // 🛑 ACTION CLÉ : Redirection vers le dashboard après succès
+      navigateTo('/dashboard')
+      
     } else {
       loginError.value = json.message || "Email ou mot de passe incorrect."
     }
@@ -62,6 +65,7 @@ function onLogout () {
       <div v-if="isLoggedIn" class="logged-in-message">
         <h2>🎉 Tu es connecté !</h2>
         <p>Tu peux te rendre sur l'espace recettes ou te déconnecter.</p>
+        <NuxtLink to="/dashboard" class="submit-button" style="margin-right: 15px;">Aller au Dashboard</NuxtLink>
         <button @click="onLogout" class="logout-button">Se déconnecter</button>
       </div>
 
@@ -102,6 +106,7 @@ function onLogout () {
 </template>
 
 <style scoped lang="scss">
+
 $error-color: #d9534f;
 $success-color: #5cb85c;
 
@@ -180,6 +185,7 @@ $success-color: #5cb85c;
   cursor: pointer;
   transition: background-color 0.2s;
   margin-top: 10px;
+  text-decoration: none; // Ajouté pour le NuxtLink du dashboard
 
   &:hover {
     background-color: darken($primary-color, 10%);
@@ -194,21 +200,6 @@ $success-color: #5cb85c;
   border-radius: $radius;
   margin-bottom: 15px;
   font-size: 0.9rem;
-}
-
-.signup-link {
-  margin-top: 20px;
-  font-size: 0.95rem;
-  color: $text-color;
-  
-  a {
-    color: $primary-color;
-    text-decoration: none;
-    font-weight: bold;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
 }
 
 .logged-in-message {

@@ -15,7 +15,7 @@ const onLogout = () => {
 const navLinks = computed(() => {
   const baseLinks = [
     { name: 'Recettes', to: '/recettes' },
-    { name: 'Blog', to: '/blog' },
+    { name: 'Dashboard', to: '/dashboard' },
     { name: 'Contact', to: '/contact' }
   ];
 

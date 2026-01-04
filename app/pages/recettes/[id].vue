@@ -1,10 +1,8 @@
 <script lang="ts" setup>
-// Pas besoin d'importer manuellement useRoute, etc. Nuxt le fait automatiquement.
 const route = useRoute()
 const config = useRuntimeConfig()
 
 // 1. Récupération des données
-// On ajoute 'transform' pour s'assurer que si ingredients est null, on a un tableau vide
 const { data: recipe, error } = await useAsyncData(`recipe-${route.params.id}`, async () => {
   const response = await $fetch<any>(`${config.public.apiUrl}/api/recipes/${route.params.id}`)
   return response.data
@@ -18,12 +16,10 @@ if (!recipe.value || error.value) {
 // 3. SEO
 useHead({
   title: recipe.value.title + ' - Foodieland',
-  meta: [
-    { name: 'description', content: `Détails de la recette : ${recipe.value.title}.` }
-  ]
+  meta: [{ name: 'description', content: recipe.value.description }]
 })
 
-// 4. Image Hero
+// 4. Image Hero en Background (Fonctionnel)
 const heroStyle = computed(() => {
   const imgName = recipe.value?.image_url
   const finalImage = (imgName && imgName.includes('.')) 
@@ -32,6 +28,13 @@ const heroStyle = computed(() => {
 
   return { backgroundImage: `url('${finalImage}')` }
 })
+
+// 5. Interaction (Cocher les ingrédients)
+const checkedIngredients = ref(new Set())
+const toggleIngredient = (index: number) => {
+  if (checkedIngredients.value.has(index)) checkedIngredients.value.delete(index)
+  else checkedIngredients.value.add(index)
+}
 </script>
 
 <template>
@@ -39,11 +42,18 @@ const heroStyle = computed(() => {
     
     <header class="recipe-hero" :style="heroStyle">
       <div class="hero-overlay">
-        <div class="container">
-          <p class="recipe-hero__cuisine">
-            {{ recipe.cuisine_name || 'Recette' }}
-          </p>
-          <h1 class="recipe-hero__title">{{ recipe.title }}</h1>
+        <div class="container hero-content">
+          
+          <div class="hero-badges">
+            <span class="badge" v-if="recipe.cuisine_name">
+              <i class="fa-solid fa-utensils"></i> {{ recipe.cuisine_name }}
+            </span>
+            <span class="badge badge-goal" v-if="recipe.goal_name">
+              <i class="fa-solid fa-bullseye"></i> {{ recipe.goal_name }}
+            </span>
+          </div>
+
+          <h1 class="hero-title">{{ recipe.title }}</h1>
         </div>
       </div>
     </header>
@@ -52,215 +62,250 @@ const heroStyle = computed(() => {
       <div class="container">
         
         <div v-if="recipe.description" class="description-block">
-             <p>{{ recipe.description }}</p>
+           <p>{{ recipe.description }}</p>
         </div>
 
-        <div class="content-grid">
+        <section class="recipe-section ingredients-section">
+          <h2 class="section-title"><i class="fa-solid fa-basket-shopping"></i> Ingrédients</h2>
           
-          <section class="ingredients-card">
-            <h2 class="section-title">🔪 Ingrédients</h2>
-            
-            <ul class="ingredient-list">
-              <li v-for="(ingredient, index) in (recipe.ingredients || [])" :key="index">
-                <span class="quantity" v-if="ingredient.quantity">
-                  {{ ingredient.quantity }} {{ ingredient.unit }}
-                </span>
-                <span class="name">
-                  {{ ingredient.name }}
-                </span>
-              </li>
-            </ul>
-
-            <p v-if="!recipe.ingredients || recipe.ingredients.length === 0" class="empty-msg">
-                Aucun ingrédient listé.
-            </p>
-          </section>
-
-          <section class="instructions-section">
-            <h2 class="section-title">🧑‍🍳 Préparation</h2>
-            <div class="instructions">
-              
-              <div v-if="recipe.instructions && Array.isArray(recipe.instructions) && recipe.instructions.length > 0">
-                  <div v-for="(instruction, index) in recipe.instructions" :key="index" class="step-item">
-                    <span class="step-num" v-if="instruction.step_number">{{ instruction.step_number }}.</span>
-                    <p>{{ instruction.description }}</p>
+          <div class="ingredients-wrapper">
+             <ul class="ingredient-list" v-if="recipe.ingredients && recipe.ingredients.length">
+                <li 
+                  v-for="(ing, index) in recipe.ingredients" 
+                  :key="index" 
+                  class="ingredient-item"
+                  :class="{ 'is-checked': checkedIngredients.has(index) }"
+                  @click="toggleIngredient(index)"
+                >
+                  <div class="checkbox-circle">
+                    <i class="fa-solid fa-check" v-if="checkedIngredients.has(index)"></i>
                   </div>
-              </div>
-              
-              <p v-else-if="recipe.instructions && typeof recipe.instructions === 'string'">
-                {{ recipe.instructions }}
-              </p>
-              
-              <p v-else class="empty-msg">Aucune instruction disponible.</p>
-            </div>
-          </section>
+                  <div class="ing-details">
+                    <span class="qty" v-if="ing.quantity">{{ ing.quantity }} {{ ing.unit }}</span>
+                    <span class="name">{{ ing.name }}</span>
+                  </div>
+                </li>
+             </ul>
+             <p v-else class="empty-msg">Aucun ingrédient listé.</p>
+          </div>
+        </section>
 
-        </div>
+        <section class="recipe-section instructions-section">
+          <h2 class="section-title"><i class="fa-solid fa-fire-burner"></i> Préparation</h2>
+          
+          <div class="steps-wrapper">
+            <div v-if="recipe.instructions && Array.isArray(recipe.instructions) && recipe.instructions.length > 0">
+               <div v-for="(step, index) in recipe.instructions" :key="index" class="step-card">
+                  <div class="step-number">{{ step.step_number || index + 1 }}</div>
+                  <p class="step-desc">{{ step.description }}</p>
+               </div>
+            </div>
+            
+            <div v-else-if="recipe.instructions && typeof recipe.instructions === 'string'" class="text-fallback">
+              <p>{{ recipe.instructions }}</p>
+            </div>
+            
+            <p v-else class="empty-msg">Aucune instruction disponible.</p>
+          </div>
+        </section>
+
       </div>
     </main>
   </div>
 </template>
 
 <style lang="scss" scoped>
-$primary-color: #ff6600;
-$text-color: #333;
-$light-border-color: #eee;
-$radius: 8px;
-$font-header: 'Inter', sans-serif;
-$font-body: 'Inter', sans-serif;
+// --- VARIABLES ---
+$primary: #ff6600;
+$dark: #1a1a1a;
+$text: #444;
+$bg-light: #f9f9fc;
+$border: #eee;
+$radius: 12px;
 
 .container {
-    max-width: 1200px;
+    max-width: 900px; // Largeur lecture confortable
     margin: 0 auto;
     padding: 0 20px;
 }
 
-/* HERO SECTION */
+// --- HERO SECTION (Image en background) ---
 .recipe-hero {
     height: 60vh;
     min-height: 400px;
     background-size: cover;
     background-position: center;
     position: relative;
-    display: flex;
-    align-items: flex-end;
     
+    // Dégradé sombre pour lisibilité
     .hero-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0.5) 100%);
-        padding-bottom: 50px;
+        position: absolute; inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.4) 100%);
         display: flex;
         align-items: flex-end;
+        padding-bottom: 60px;
     }
-    
-    .container {
-        position: relative; 
-        z-index: 10;
+
+    .hero-content {
         width: 100%;
         text-align: center;
     }
 
-    &__cuisine {
-        font-family: $font-body;
-        color: $primary-color;
-        background: rgba(255, 255, 255, 0.9);
-        padding: 5px 15px;
-        border-radius: 20px;
-        display: inline-block;
-        font-size: 1.2rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        margin-bottom: 10px;
+    .hero-badges {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 20px;
+
+        .badge {
+            background: rgba(255, 255, 255, 0.95);
+            color: $dark;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            display: inline-flex; align-items: center; gap: 8px;
+
+            &.badge-goal {
+                background: $primary;
+                color: white;
+            }
+        }
     }
 
-    &__title {
-        font-family: $font-header;
-        font-size: 4rem;
+    .hero-title {
+        font-family: 'Inter', sans-serif;
+        font-size: 3.5rem;
         color: white;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         margin: 0;
         line-height: 1.1;
-        @media (max-width: 768px) { font-size: 2.5rem; }
+        text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        
+        @media (max-width: 768px) { font-size: 2.2rem; }
     }
 }
 
+// --- CONTENU PRINCIPAL ---
 .recipe-content-main {
-    padding: 50px 0;
+    padding: 60px 0;
+    background-color: white;
 }
 
-/* DESCRIPTION (Pleine largeur) */
 .description-block {
     text-align: center;
-    max-width: 800px;
-    margin: 0 auto 50px auto;
-    
-    p {
-        font-size: 1.2rem;
-        line-height: 1.6;
-        font-style: italic;
-        color: #555;
-    }
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: #666;
+    margin-bottom: 60px;
+    font-style: italic;
 }
 
-/* GRILLE */
-.content-grid {
-    display: grid;
-    grid-template-columns: 1fr 2fr; /* Ingrédients (1/3) - Prépa (2/3) */
-    gap: 60px;
-    align-items: start;
-    
-    @media (max-width: 900px) {
-         grid-template-columns: 1fr;
-         gap: 40px;
-    }
+// --- SECTIONS ---
+.recipe-section {
+    margin-bottom: 60px;
 }
 
 .section-title {
-    font-family: $font-header;
     font-size: 1.8rem;
-    color: $primary-color;
-    border-bottom: 2px solid $light-border-color;
-    padding-bottom: 10px;
-    margin-bottom: 25px;
-    font-weight: 700;
+    font-weight: 800;
+    color: $dark;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid $border;
+    display: flex; align-items: center; gap: 12px;
+    
+    i { color: $primary; }
 }
 
-/* INGREDIENTS */
-.ingredients-card {
-    background-color: white;
+// --- INGREDIENTS (Liste Moderne) ---
+.ingredients-wrapper {
+    background: $bg-light;
     padding: 30px;
     border-radius: $radius;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    border-top: 5px solid $primary-color;
+}
 
-    .ingredient-list {
-        list-style: none;
-        padding: 0;
-        
-        li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px dotted $light-border-color;
-            font-family: $font-body;
-            font-size: 1rem;
-        }
-        li:last-child { border-bottom: none; }
-        
-        .quantity {
-            color: $primary-color;
-            font-weight: 600;
-            margin-right: 15px;
-            white-space: nowrap;
-        }
-        .name { color: $text-color; text-align: right; }
+.ingredient-list {
+    list-style: none;
+    padding: 0;
+    // Grille automatique : ça remplit la largeur
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+.ingredient-item {
+    background: white;
+    padding: 12px 15px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    &.is-checked {
+        opacity: 0.5;
+        .checkbox-circle { background: $primary; border-color: $primary; color: white; }
+        .name { text-decoration: line-through; }
+    }
+
+    .checkbox-circle {
+        width: 24px; height: 24px;
+        border: 2px solid #ddd;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        color: white;
+        font-size: 0.8rem;
+        transition: 0.2s;
+    }
+
+    .ing-details {
+        font-size: 1rem;
+        .qty { font-weight: 700; color: $primary; margin-right: 5px; }
+        .name { color: $text; }
     }
 }
 
-/* PREPARATION */
-.instructions-section {
-    font-family: $font-body;
+// --- INSTRUCTIONS (Liste verticale) ---
+.steps-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
 
-    .step-item {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 20px;
-        
-        .step-num {
-            font-weight: bold;
-            color: $primary-color;
-            font-size: 1.2rem;
-            min-width: 25px;
-        }
-        p {
-            margin: 0;
-            line-height: 1.6;
-            color: #333;
-            font-size: 1.1rem;
-        }
+.step-card {
+    display: flex;
+    gap: 20px;
+    
+    .step-number {
+        flex-shrink: 0;
+        width: 45px; height: 45px;
+        background: $dark;
+        color: white;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
     }
+    
+    .step-desc {
+        padding-top: 8px;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: $text;
+    }
+}
+
+.text-fallback p {
+    white-space: pre-line;
+    line-height: 1.8;
 }
 
 .empty-msg { color: #999; font-style: italic; }

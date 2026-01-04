@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref,computed} from 'vue'
+import { ref, computed } from 'vue'
 
 const email = ref('')
 const password = ref('')
 const loginError = ref<string | null>(null)
+const isLoading = ref(false)
 const config = useRuntimeConfig()
 
 const tokenCookie = useCookie('recipe_token')
@@ -11,15 +12,15 @@ const isLoggedIn = computed(() => !!tokenCookie.value)
 
 async function onSubmit () {
   loginError.value = null
+  isLoading.value = true
 
   if (!email.value || !password.value) {
     loginError.value = "Veuillez remplir tous les champs."
+    isLoading.value = false
     return
   }
 
   try {
-    console.log('=> Tentative de connexion API')
-
     const response = await fetch(`${config.public.apiUrl}/api/users/login`, { 
       method: 'POST',
       headers: {
@@ -37,10 +38,7 @@ async function onSubmit () {
     if (response.ok && json.data?.token) {
       const token = json.data.token
       tokenCookie.value = token
-      
-      // 🛑 ACTION CLÉ : Redirection vers le dashboard après succès
       navigateTo('/dashboard')
-      
     } else {
       loginError.value = json.message || "Email ou mot de passe incorrect."
     }
@@ -48,6 +46,8 @@ async function onSubmit () {
   } catch (err) {
     console.error(err)
     loginError.value = "Une erreur est survenue lors de la communication avec le serveur."
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -61,19 +61,22 @@ function onLogout () {
 <template>
   <div class="login-page-container">
     <div class="login-card">
-      
       <div v-if="isLoggedIn" class="logged-in-message">
         <h2>🎉 Tu es connecté !</h2>
         <p>Tu peux te rendre sur l'espace recettes ou te déconnecter.</p>
-        <NuxtLink to="/dashboard" class="submit-button" style="margin-right: 15px;">Aller au Dashboard</NuxtLink>
-        <button @click="onLogout" class="logout-button">Se déconnecter</button>
+        <div class="logged-actions">
+           <NuxtLink to="/dashboard" class="btn-primary">Aller au Dashboard</NuxtLink>
+           <button class="btn-secondary" @click="onLogout">Se déconnecter</button>
+        </div>
       </div>
 
       <div v-else>
-        <h1 class="card-title">Connexion à Foodieland.</h1>
+        <header class="card-header">
+            <h1 class="card-title">Connexion</h1>
+            <p class="subtitle">Heureux de vous revoir !</p>
+        </header>
 
-        <form @submit.prevent="onSubmit" class="login-form">
-          
+        <form class="login-form" @submit.prevent="onSubmit">
           <div class="form-group">
             <label for="email" class="form-label">Email</label>
             <input 
@@ -81,8 +84,9 @@ function onLogout () {
               v-model="email" 
               type="email" 
               class="form-input" 
+              placeholder="exemple@mail.com"
               required
-            />
+            >
           </div>
 
           <div class="form-group">
@@ -92,52 +96,78 @@ function onLogout () {
               v-model="password" 
               type="password" 
               class="form-input" 
+              placeholder="••••••"
               required
-            />
+            >
           </div>
           
-          <p v-if="loginError" class="error-message">{{ loginError }}</p>
+          <transition name="fade">
+            <p v-if="loginError" class="error-message">
+                <i class="fa-solid fa-circle-exclamation"></i> {{ loginError }}
+            </p>
+          </transition>
 
-          <button type="submit" class="submit-button">Se connecter</button>
+          <button type="submit" class="submit-button" :disabled="isLoading">
+            <span v-if="isLoading">Connexion...</span>
+            <span v-else>Se connecter</span>
+          </button>
         </form>
+
+        <div class="form-footer-link">
+            <p>Pas encore de compte ? <NuxtLink to="/register" class="link">Créer un compte</NuxtLink></p>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-
+$primary-color: #ff6600;
+$primary-hover: #e65c00;
+$text-color: #333;
+$text-light: #666;
+$bg-page: #f2f4f8;
+$white: #fff;
+$radius: 16px;
+$shadow: 0 20px 60px -10px rgba(0,0,0,0.08);
 $error-color: #d9534f;
-$success-color: #5cb85c;
+$error-bg: #fee2e2;
 
 .login-page-container {
-  min-height: calc(100vh - 120px);
+  min-height: calc(100vh - 80px);
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 40px 20px;
-  background-color: $color-secondary;
+  background-color: $bg-page;
 }
 
 .login-card {
   width: 100%;
   max-width: 400px;
   padding: 40px;
-  background-color: white;
+  background-color: $white;
   border-radius: $radius;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: $shadow;
   text-align: center;
 }
 
-.card-title {
-  font-family: $font-header;
-  font-size: 2rem;
-  color: $text-color;
-  margin-bottom: 30px;
+.card-header {
+    margin-bottom: 30px;
+}
 
-  &::first-letter {
-    color: $primary-color;
-  } 
+.card-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: $text-color;
+  margin-bottom: 5px;
+
+  &::first-letter { color: $primary-color; } 
+}
+
+.subtitle {
+    color: $text-light;
+    font-size: 1rem;
 }
 
 .login-form {
@@ -152,7 +182,6 @@ $success-color: #5cb85c;
 
 .form-label {
   display: block;
-  font-family: $font-body;
   font-weight: 600;
   color: $text-color;
   margin-bottom: 8px;
@@ -161,66 +190,115 @@ $success-color: #5cb85c;
 
 .form-input {
   width: 100%;
-  padding: 12px 15px;
-  border: 1px solid #ccc;
-  border-radius: $radius;
+  padding: 14px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
   font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  background: #fdfdfd;
+  transition: all 0.3s ease;
 
   &:focus {
+    background: $white;
     border-color: $primary-color;
+    box-shadow: 0 0 0 4px rgba($primary-color, 0.15);
     outline: none;
-    box-shadow: 0 0 0 3px rgba($primary-color, 0.2);
   }
 }
 
 .submit-button {
   background-color: $primary-color;
   color: white;
-  padding: 12px 20px;
+  padding: 14px;
   border: none;
-  border-radius: $radius;
+  border-radius: 12px;
   font-size: 1.1rem;
-  font-weight: bold;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   margin-top: 10px;
-  text-decoration: none; // Ajouté pour le NuxtLink du dashboard
+  width: 100%;
 
   &:hover {
-    background-color: darken($primary-color, 10%);
+    background-color: $primary-hover;
+    transform: translateY(-2px);
+  }
+  
+  &:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+      transform: none;
   }
 }
 
 .error-message {
-  color: $error-color;
-  background-color: lighten($error-color, 35%);
-  border: 1px solid $error-color;
-  padding: 10px;
-  border-radius: $radius;
-  margin-bottom: 15px;
+  color: #b91c1c;
+  background-color: $error-bg;
+  padding: 12px;
+  border-radius: 10px;
   font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .logged-in-message {
-  h2 {
-    color: $success-color;
-    margin-bottom: 10px;
-    font-family: $font-header;
+  h2 { color: #166534; margin-bottom: 10px; }
+  p { margin-bottom: 25px; color: $text-color; }
+  
+  .logged-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
   }
-  p {
-    margin-bottom: 20px;
-    color: $text-color;
+  
+  .btn-primary {
+      display: inline-block;
+      text-decoration: none;
+      background: $primary-color;
+      color: white;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      transition: background 0.2s;
+      &:hover { background: $primary-hover; }
+  }
+  
+  .btn-secondary {
+      background: #eee;
+      color: $text-color;
+      border: none;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      &:hover { background: #ddd; }
   }
 }
 
-.logout-button {
-  @extend .submit-button;
-  background-color: #ccc;
-  color: $text-color;
+.form-footer-link {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
   
-  &:hover {
-    background-color: darken(#ccc, 10%);
+  p {
+      color: $text-light;
+      font-size: 0.95rem;
+  }
+
+  .link {
+    color: $primary-color;
+    text-decoration: none;
+    font-weight: 700;
+    transition: text-decoration 0.2s;
+    
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
+
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

@@ -84,9 +84,6 @@ const deleteRecipe = async (id: number) => {
                 </td>
                 <td class="col-cuisine">{{ recipe.cuisine_name }}</td>
                 <td class="col-actions actions-cell">
-                  <NuxtLink :to="`/dashboard/edit/${recipe.recipe_id}`" class="btn-icon edit" aria-label="Modifier">
-                    <i class="fa-solid fa-pen"></i>
-                  </NuxtLink>
                   <button @click="deleteRecipe(recipe.recipe_id)" class="btn-icon delete" aria-label="Supprimer">
                     <i class="fa-solid fa-trash"></i>
                   </button>
